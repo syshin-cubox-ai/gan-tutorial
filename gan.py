@@ -27,7 +27,7 @@ def train(
     real_score = None
     fake_score = None
     for eph in tqdm.tqdm(range(epoch), 'Epoch', position=0):
-        for images, _ in tqdm.tqdm(trainloader, 'Batch', leave=False, position=1):
+        for images, labels in tqdm.tqdm(trainloader, 'Batch', leave=False, position=1):
             images = torch.flatten(images, start_dim=1).to(device)
             real_labels = torch.ones((images.shape[0], 1), device=device)
             fake_labels = torch.zeros((images.shape[0], 1), device=device)
@@ -69,7 +69,7 @@ def train(
         fake_score = fake_score.mean().item()
 
         # Get sample fake images
-        fake_images = infer(generator, 8)
+        fake_images = infer(generator, device, 8)
         fake_images = [wandb.Image(fake_image.permute((1, 2, 0)).cpu().numpy())
                        for fake_image in fake_images]
 
@@ -77,8 +77,8 @@ def train(
         wandb.log({
             'd_loss': d_loss,
             'g_loss': g_loss,
-            'real_score': real_score,
-            'fake_score': fake_score,
+            'D(x)': real_score,
+            'D(G(z))': fake_score,
             'g_optimizer_lr': g_optimizer.param_groups[0]['lr'],
             'd_optimizer_lr': d_optimizer.param_groups[0]['lr'],
             'fake_images': fake_images,
@@ -95,7 +95,9 @@ def train(
         }, os.path.join('weights', 'gan.pth'))
 
 
-def infer(generator: nn.Module, num_images=10) -> torch.Tensor:
+def infer(generator: nn.Module, device: torch.device, num_images=10) -> torch.Tensor:
+    generator.eval()
+
     z = torch.randn((num_images, 64), device=device)
     with torch.no_grad():
         fake_images = generator(z)
@@ -128,9 +130,9 @@ if __name__ == '__main__':
     ).to(device)
     discriminator = nn.Sequential(
         nn.Linear(784, 256),
-        nn.SELU(),
+        nn.LeakyReLU(0.2),
         nn.Linear(256, 256),
-        nn.SELU(),
+        nn.LeakyReLU(0.2),
         nn.Linear(256, 1),
         nn.Sigmoid(),
     ).to(device)
@@ -139,7 +141,7 @@ if __name__ == '__main__':
         checkpoint = torch.load(os.path.join('weights', 'gan.pth'))
         generator.load_state_dict(checkpoint['generator_state_dict'])
 
-        fake_images = infer(generator)
+        fake_images = infer(generator, device)
 
         os.makedirs('results', exist_ok=True)
         for i, fake_image in enumerate(fake_images, start=1):
