@@ -69,7 +69,7 @@ def train(
         fake_score = fake_score.mean().item()
 
         # Get sample fake images
-        fake_images = infer(generator, device, 8)
+        fake_images = infer(generator, device, 40)
         fake_images = wandb.Image(fake_images.permute((1, 2, 0)).cpu().numpy())
 
         # Log to wandb
@@ -94,7 +94,7 @@ def train(
         }, os.path.join('weights', 'gan.pth'))
 
 
-def infer(generator: nn.Module, device: torch.device, num_images=16) -> torch.Tensor:
+def infer(generator: nn.Module, device: torch.device, num_images=100) -> torch.Tensor:
     generator.eval()
 
     z = torch.randn((num_images, 64), device=device)
@@ -102,7 +102,7 @@ def infer(generator: nn.Module, device: torch.device, num_images=16) -> torch.Te
         fake_images = generator(z)
     fake_images = fake_images.reshape((-1, 1, 28, 28))
     fake_images = F.normalize(fake_images, [-1 / 127 - 1], [1 / 127]).round().to(torch.uint8)
-    fake_images = torchvision.utils.make_grid(fake_images, pad_value=110)
+    fake_images = torchvision.utils.make_grid(fake_images, 10, pad_value=110)
     return fake_images
 
 
