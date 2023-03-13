@@ -76,6 +76,7 @@ def train(
     for eph in tqdm.tqdm(range(epoch), 'Epoch', position=0):
         for images, labels in tqdm.tqdm(trainloader, 'Batch', leave=False, position=1):
             images = torch.flatten(images, start_dim=1).to(device)
+            labels = labels.to(device)
             real_labels = torch.ones((images.shape[0], 1), device=device)
             fake_labels = torch.zeros((images.shape[0], 1), device=device)
 
