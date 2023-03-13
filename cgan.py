@@ -102,8 +102,7 @@ def train(
             d_optimizer.step()
 
             # 생성자가 판별자를 속였는지에 대한 loss 계산
-            fake_images = generator(z, g_label)
-            deception_score = discriminator(fake_images, g_label)
+            deception_score = discriminator(generator(z, g_label), g_label)
             g_loss = criterion(deception_score, real_labels)
 
             # 생성자 모델 가중치 업데이트
