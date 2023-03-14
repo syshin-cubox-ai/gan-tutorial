@@ -163,6 +163,7 @@ def infer(generator: nn.Module, device: torch.device, num_items=10) -> np.ndarra
 
 if __name__ == '__main__':
     config = {
+        'model_name': 'CGAN',
         'batch_size': 256,
         'epoch': 300,
         'lr': 0.0002,

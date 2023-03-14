@@ -113,6 +113,7 @@ def infer(generator: nn.Module, device: torch.device, num_images=100) -> np.ndar
 
 if __name__ == '__main__':
     config = {
+        'model_name': 'GAN',
         'batch_size': 256,
         'epoch': 500,
         'lr': 0.0002,
