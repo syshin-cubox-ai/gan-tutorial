@@ -19,7 +19,7 @@ if __name__ == '__main__':
         'model_name': 'DCGAN',
         'batch_size': 256,
         'epoch': 50,
-        'lr': 0.0001,
+        'lr': 0.0002,
         'reproducibility': True,
         'num_workers': 8,
         'pin_memory': True,
@@ -43,16 +43,20 @@ if __name__ == '__main__':
         nn.Tanh(),
     )
     discriminator = nn.Sequential(
-        nn.Conv2d(1, 64, 5, 2, 2, bias=False),
+        nn.Conv2d(1, 32, 3, 2, 1, bias=False),
+        nn.BatchNorm2d(32),
+        nn.LeakyReLU(0.3),
+        nn.Dropout(0.3),
+        nn.Conv2d(32, 64, 3, 2, 1, bias=False),
         nn.BatchNorm2d(64),
         nn.LeakyReLU(0.3),
         nn.Dropout(0.3),
-        nn.Conv2d(64, 128, 5, 2, 2, bias=False),
+        nn.Conv2d(64, 128, 3, 2, 1, bias=False),
         nn.BatchNorm2d(128),
         nn.LeakyReLU(0.3),
         nn.Dropout(0.3),
         nn.Flatten(),
-        nn.Linear(6272, 1),
+        nn.Linear(2048, 1),
         nn.Sigmoid(),
     )
 
