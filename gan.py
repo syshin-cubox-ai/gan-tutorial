@@ -10,6 +10,7 @@ import torchvision
 import torchvision.transforms.functional as F
 import tqdm
 import wandb
+from PIL import Image
 
 
 def train(
@@ -26,6 +27,7 @@ def train(
     g_loss = None
     real_score = None
     fake_score = None
+    frames = []
     for eph in tqdm.tqdm(range(epoch), 'Epoch', position=0):
         for images, labels in tqdm.tqdm(trainloader, 'Batch', leave=False, position=1):
             images = torch.flatten(images, start_dim=1).to(device)
@@ -69,6 +71,7 @@ def train(
 
         # Get sample fake images
         fake_images = infer(generator, device, 40)
+        frames.append(Image.fromarray(fake_images))
 
         # Log to wandb
         wandb.log({
@@ -90,6 +93,11 @@ def train(
             'real_score': real_score,
             'fake_score': fake_score,
         }, os.path.join('weights', 'gan.pth'))
+
+    # Save fake images per epoch to gif
+    os.makedirs(os.path.join('results'))
+    frames[0].save(os.path.join('results', 'train_gan.gif'), 'GIF',
+                   save_all=True, append_images=frames, duration=200, loop=0)
 
 
 def infer(generator: nn.Module, device: torch.device, num_images=100) -> np.ndarray:
