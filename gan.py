@@ -79,8 +79,6 @@ def train(
             'g_loss': g_loss,
             'D(x)': real_score,
             'D(G(z))': fake_score,
-            'g_optimizer_lr': g_optimizer.param_groups[0]['lr'],
-            'd_optimizer_lr': d_optimizer.param_groups[0]['lr'],
             'fake_images': wandb.Image(fake_images),
         })
 
