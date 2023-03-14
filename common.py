@@ -20,11 +20,13 @@ class BaseGAN:
             config: dict,
             generator: nn.Module,
             discriminator: nn.Module,
+            z_dim: int,
     ):
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.generator = generator.to(self.device)
         self.discriminator = discriminator.to(self.device)
+        self.z_dim = z_dim
         self.trainloader = None
         self.criterion = None
         self.g_optimizer = None

@@ -14,8 +14,9 @@ class GAN(common.BaseGAN):
             config: dict,
             generator: nn.Module,
             discriminator: nn.Module,
+            z_dim: int,
     ):
-        super().__init__(config, generator, discriminator)
+        super().__init__(config, generator, discriminator, z_dim)
 
     def train_step(
             self,
@@ -31,7 +32,7 @@ class GAN(common.BaseGAN):
         d_loss_real = self.criterion(real_score, real_labels)
 
         # 랜덤 텐서로 fake 이미지 생성
-        z = torch.randn((imgs.shape[0], 64), device=self.device)
+        z = torch.randn((imgs.shape[0], self.z_dim), device=self.device)
         sample_img = self.generator(z)
 
         # 판별자가 fake 이미지를 fake로 인식하는 loss 계산
@@ -60,7 +61,7 @@ class GAN(common.BaseGAN):
     def infer(self, num_rows: int) -> np.ndarray:
         self.generator.eval()
 
-        z = torch.randn((num_rows * 10, 64), device=self.device)
+        z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
         with torch.no_grad():
             sample_img = self.generator(z)
         sample_img = self.post_process_sample_img(sample_img)
@@ -99,7 +100,7 @@ if __name__ == '__main__':
         nn.Sigmoid(),
     )
 
-    gan = GAN(config, generator, discriminator)
+    gan = GAN(config, generator, discriminator, 64)
     if gan.select_training_or_demo() == 'Train':
         gan.train()
     else:

@@ -1,6 +1,3 @@
-from typing import Tuple
-
-import torch
 import torch.nn as nn
 
 import gan
@@ -12,48 +9,9 @@ class DCGAN(gan.GAN):
             config: dict,
             generator: nn.Module,
             discriminator: nn.Module,
+            z_dim: int,
     ):
-        super().__init__(config, generator, discriminator)
-
-    def train_step(
-            self,
-            imgs: torch.Tensor,
-            labels: torch.Tensor,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        imgs = imgs.to(self.device)
-        real_labels = torch.ones((imgs.shape[0], 1), device=self.device)
-        fake_labels = torch.zeros((imgs.shape[0], 1), device=self.device)
-
-        # 판별자가 real 이미지를 real로 인식하는 loss 계산
-        real_score = self.discriminator(imgs)
-        d_loss_real = self.criterion(real_score, real_labels)
-
-        # 랜덤 텐서로 fake 이미지 생성
-        z = torch.randn((imgs.shape[0], 100), device=self.device)
-        sample_img = self.generator(z)
-
-        # 판별자가 fake 이미지를 fake로 인식하는 loss 계산
-        fake_score = self.discriminator(sample_img)
-        d_loss_fake = self.criterion(fake_score, fake_labels)
-
-        # real과 fake 이미지로 낸 오차를 더해서 최종 판별자 loss로 계산
-        d_loss = d_loss_real + d_loss_fake
-
-        # 판별자 모델 가중치 업데이트
-        self.d_optimizer.zero_grad(set_to_none=True)
-        d_loss.backward()
-        self.d_optimizer.step()
-
-        # 생성자가 판별자를 속였는지에 대한 loss 계산
-        deception_score = self.discriminator(self.generator(z))
-        g_loss = self.criterion(deception_score, real_labels)
-
-        # 생성자 모델 가중치 업데이트
-        self.g_optimizer.zero_grad(set_to_none=True)
-        g_loss.backward()
-        self.g_optimizer.step()
-
-        return d_loss, g_loss, real_score, fake_score
+        super().__init__(config, generator, discriminator, z_dim)
 
 
 if __name__ == '__main__':
@@ -98,7 +56,7 @@ if __name__ == '__main__':
         nn.Sigmoid(),
     )
 
-    gan = DCGAN(config, generator, discriminator)
+    gan = DCGAN(config, generator, discriminator, 100)
     if gan.select_training_or_demo() == 'Train':
         gan.train()
     else:

@@ -62,8 +62,9 @@ class CGAN(common.BaseGAN):
             config: dict,
             generator: nn.Module,
             discriminator: nn.Module,
+            z_dim: int,
     ):
-        super().__init__(config, generator, discriminator)
+        super().__init__(config, generator, discriminator, z_dim)
 
     def train_step(
             self,
@@ -80,7 +81,7 @@ class CGAN(common.BaseGAN):
         d_loss_real = self.criterion(real_score, real_labels)
 
         # 랜덤 텐서로 fake 이미지 생성
-        z = torch.randn((imgs.shape[0], 100), device=self.device)
+        z = torch.randn((imgs.shape[0], self.z_dim), device=self.device)
         g_label = torch.randint(0, 10, (imgs.shape[0],)).to(self.device)
         sample_img = self.generator(z, g_label)
 
@@ -110,7 +111,7 @@ class CGAN(common.BaseGAN):
     def infer(self, num_rows: int) -> np.ndarray:
         self.generator.eval()
 
-        z = torch.randn((num_rows * 10, 100), device=self.device)
+        z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
         g_label = torch.tile(torch.arange(10, device=self.device), (num_rows,))
         with torch.no_grad():
             sample_img = self.generator(z, g_label)
@@ -135,7 +136,7 @@ if __name__ == '__main__':
     generator = Generator()
     discriminator = Discriminator()
 
-    gan = CGAN(config, generator, discriminator)
+    gan = CGAN(config, generator, discriminator, 100)
     if gan.select_training_or_demo() == 'Train':
         gan.train()
     else:
