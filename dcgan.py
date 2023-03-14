@@ -60,8 +60,8 @@ if __name__ == '__main__':
         nn.Sigmoid(),
     )
 
-    gan = DCGAN(config, generator, discriminator, 100)
-    if gan.select_training_or_demo() == 'Train':
-        gan.train()
+    dcgan = DCGAN(config, generator, discriminator, 100)
+    if dcgan.select_training_or_demo() == 'Train':
+        dcgan.train()
     else:
-        gan.demo()
+        dcgan.demo()

@@ -15,13 +15,7 @@ from PIL import Image
 
 
 class BaseGAN:
-    def __init__(
-            self,
-            config: dict,
-            generator: nn.Module,
-            discriminator: nn.Module,
-            z_dim: int,
-    ):
+    def __init__(self, config: dict, generator: nn.Module, discriminator: nn.Module, z_dim: int):
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.generator = generator.to(self.device)
@@ -130,10 +124,10 @@ class BaseGAN:
         checkpoint = torch.load(os.path.join('weights', f'{self.config["model_name"].lower()}.pth'))
         self.generator.load_state_dict(checkpoint['generator_state_dict'])
 
-        sample_image = self.infer(num_rows)
+        sample_img = self.infer(num_rows)
 
         os.makedirs('results', exist_ok=True)
-        cv2.imwrite(os.path.join('results', f'{self.config["model_name"].lower()}.png'), sample_image)
+        cv2.imwrite(os.path.join('results', f'{self.config["model_name"].lower()}.png'), sample_img)
         print('Image creation complete.')
 
     def select_training_or_demo(self) -> str:

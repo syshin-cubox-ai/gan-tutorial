@@ -57,13 +57,7 @@ class Discriminator(nn.Module):
 
 
 class CGAN(common.BaseGAN):
-    def __init__(
-            self,
-            config: dict,
-            generator: nn.Module,
-            discriminator: nn.Module,
-            z_dim: int,
-    ):
+    def __init__(self, config: dict, generator: nn.Module, discriminator: nn.Module, z_dim: int):
         super().__init__(config, generator, discriminator, z_dim)
 
     def train_step(
@@ -76,33 +70,29 @@ class CGAN(common.BaseGAN):
         real_labels = torch.ones((imgs.shape[0], 1), device=self.device)
         fake_labels = torch.zeros((imgs.shape[0], 1), device=self.device)
 
+        # 1. Update discriminator: maximize log(D(x)) + log(1 - D(G(z))
         # 판별자가 real 이미지를 real로 인식하는 loss 계산
+        self.d_optimizer.zero_grad(set_to_none=True)
         real_score = self.discriminator(imgs, labels)
         d_loss_real = self.criterion(real_score, real_labels)
 
-        # 랜덤 텐서로 fake 이미지 생성
+        # 랜덤 텐서로 fake 이미지를 생성하여 fake로 인식하는 loss 계산
         z = torch.randn((imgs.shape[0], self.z_dim), device=self.device)
         g_label = torch.randint(0, 10, (imgs.shape[0],)).to(self.device)
-        sample_img = self.generator(z, g_label)
-
-        # 판별자가 fake 이미지를 fake로 인식하는 loss 계산
-        fake_score = self.discriminator(sample_img, g_label)
+        fake_img = self.generator(z, g_label)
+        fake_score = self.discriminator(fake_img, g_label)
         d_loss_fake = self.criterion(fake_score, fake_labels)
 
-        # real과 fake 이미지로 낸 오차를 더해서 최종 판별자 loss로 계산
+        # real과 fake 이미지로 낸 오차를 더해서 최종 판별자 loss를 계산하고, 판별자 모델 업데이트
         d_loss = d_loss_real + d_loss_fake
-
-        # 판별자 모델 가중치 업데이트
-        self.d_optimizer.zero_grad(set_to_none=True)
         d_loss.backward()
         self.d_optimizer.step()
 
-        # 생성자가 판별자를 속였는지에 대한 loss 계산
+        # 2. Update discriminator: maximize log(D(G(z)))
+        # 생성자가 판별자를 속였는지에 대한 loss를 계산하고, 생성자 모델 가중치 업데이트
+        self.g_optimizer.zero_grad(set_to_none=True)
         deception_score = self.discriminator(self.generator(z, g_label), g_label)
         g_loss = self.criterion(deception_score, real_labels)
-
-        # 생성자 모델 가중치 업데이트
-        self.g_optimizer.zero_grad(set_to_none=True)
         g_loss.backward()
         self.g_optimizer.step()
 
@@ -136,8 +126,8 @@ if __name__ == '__main__':
     generator = Generator()
     discriminator = Discriminator()
 
-    gan = CGAN(config, generator, discriminator, 100)
-    if gan.select_training_or_demo() == 'Train':
-        gan.train()
+    cgan = CGAN(config, generator, discriminator, 100)
+    if cgan.select_training_or_demo() == 'Train':
+        cgan.train()
     else:
-        gan.demo()
+        cgan.demo()
