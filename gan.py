@@ -93,9 +93,9 @@ def train(
         }, os.path.join('weights', 'gan.pth'))
 
     # Save fake images per epoch to gif
-    os.makedirs(os.path.join('results'))
+    os.makedirs('results', exist_ok=True)
     frames[0].save(os.path.join('results', 'train_gan.gif'), 'GIF',
-                   save_all=True, append_images=frames, duration=200, loop=0)
+                   save_all=True, append_images=frames, duration=110, loop=0)
 
 
 def infer(generator: nn.Module, device: torch.device, num_images=100) -> np.ndarray:
