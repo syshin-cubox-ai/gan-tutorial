@@ -69,7 +69,6 @@ def train(
 
         # Get sample fake images
         fake_images = infer(generator, device, 40)
-        fake_images = wandb.Image(fake_images.permute((1, 2, 0)).cpu().numpy())
 
         # Log to wandb
         wandb.log({
@@ -79,7 +78,7 @@ def train(
             'D(G(z))': fake_score,
             'g_optimizer_lr': g_optimizer.param_groups[0]['lr'],
             'd_optimizer_lr': d_optimizer.param_groups[0]['lr'],
-            'fake_images': fake_images,
+            'fake_images': wandb.Image(fake_images),
         })
 
         # Save model
@@ -93,7 +92,7 @@ def train(
         }, os.path.join('weights', 'gan.pth'))
 
 
-def infer(generator: nn.Module, device: torch.device, num_images=100) -> torch.Tensor:
+def infer(generator: nn.Module, device: torch.device, num_images=100) -> np.ndarray:
     generator.eval()
 
     z = torch.randn((num_images, 64), device=device)
@@ -102,6 +101,7 @@ def infer(generator: nn.Module, device: torch.device, num_images=100) -> torch.T
     fake_images = fake_images.reshape((-1, 1, 28, 28))
     fake_images = F.normalize(fake_images, [-1 / 127 - 1], [1 / 127]).round().to(torch.uint8)
     fake_images = torchvision.utils.make_grid(fake_images, 10, pad_value=110)
+    fake_images = np.ascontiguousarray(fake_images.permute((1, 2, 0)).cpu().numpy())
     return fake_images
 
 
@@ -143,7 +143,7 @@ if __name__ == '__main__':
         fake_images = infer(generator, device)
 
         os.makedirs('results', exist_ok=True)
-        cv2.imwrite(os.path.join('results', 'gan.png'), fake_images.permute((1, 2, 0)).cpu().numpy())
+        cv2.imwrite(os.path.join('results', 'gan.png'), fake_images)
         print('Image creation complete.')
     else:
         # Pytorch reproducibility
