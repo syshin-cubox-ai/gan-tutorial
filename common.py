@@ -37,6 +37,7 @@ class BaseGAN:
             self.config['batch_size'],
             shuffle=True,
             num_workers=self.config['num_workers'],
+            pin_memory=self.config['pin_memory'],
             prefetch_factor=self.config['prefetch_factor'],
             persistent_workers=self.config['persistent_workers']
         )
