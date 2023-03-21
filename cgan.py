@@ -3,6 +3,7 @@ from typing import Tuple
 import numpy as np
 import torch.backends.cudnn
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.utils.data
 
 import common
@@ -11,7 +12,6 @@ import common
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
-        self.embedding = nn.Embedding(10, 10)
         self.model = nn.Sequential(
             nn.Linear(110, 256),
             nn.LeakyReLU(0.2),
@@ -24,8 +24,8 @@ class Generator(nn.Module):
         )
 
     def forward(self, z, label):
-        embed = self.embedding(label)
-        x = torch.cat((z, embed), 1)
+        one_hot_label = F.one_hot(label, num_classes=10)
+        x = torch.cat((z, one_hot_label), 1)
         x = self.model(x)
         return x
 
@@ -33,7 +33,6 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
-        self.embedding = nn.Embedding(10, 10)
         self.model = nn.Sequential(
             nn.Linear(794, 1024),
             nn.LeakyReLU(0.2),
@@ -49,9 +48,9 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x, label):
-        embed = self.embedding(label)
+        one_hot_label = F.one_hot(label, num_classes=10)
         x = torch.flatten(x, start_dim=1)
-        x = torch.cat((x, embed), 1)
+        x = torch.cat((x, one_hot_label), 1)
         x = self.model(x)
         return x
 
