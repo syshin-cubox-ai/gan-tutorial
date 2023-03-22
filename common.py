@@ -115,7 +115,6 @@ class BaseGAN:
 
     @staticmethod
     def post_process_sample_img(sample_img: torch.Tensor) -> np.ndarray:
-        sample_img = sample_img.reshape((-1, 1, 28, 28))
         sample_img = F.normalize(sample_img, [-1 / 127 - 1], [1 / 127]).round().to(torch.uint8)
         sample_img = torchvision.utils.make_grid(sample_img, 10, pad_value=110)
         sample_img = np.ascontiguousarray(sample_img.permute((1, 2, 0)).cpu().numpy())

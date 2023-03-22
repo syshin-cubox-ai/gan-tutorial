@@ -21,6 +21,7 @@ class Generator(nn.Module):
             nn.LeakyReLU(0.2),
             nn.Linear(1024, 784),
             nn.Tanh(),
+            nn.Unflatten(1, (1, 28, 28)),
         )
 
     def forward(self, z, label):
@@ -77,7 +78,7 @@ class CGAN(common.BaseGAN):
 
         # 랜덤 텐서로 fake 이미지를 생성하여 fake로 인식하는 loss 계산
         z = torch.randn((imgs.shape[0], self.z_dim), device=self.device)
-        g_label = torch.randint(0, 10, (imgs.shape[0],)).to(self.device)
+        g_label = torch.randint(0, 10, (imgs.shape[0],), device=self.device)
         fake_img = self.generator(z, g_label)
         fake_score = self.discriminator(fake_img, g_label)
         d_loss_fake = self.criterion(fake_score, fake_labels)

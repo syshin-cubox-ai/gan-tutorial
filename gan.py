@@ -79,6 +79,7 @@ if __name__ == '__main__':
         nn.ReLU(),
         nn.Linear(256, 784),
         nn.Tanh(),
+        nn.Unflatten(1, (1, 28, 28)),
     )
     discriminator = nn.Sequential(
         nn.Flatten(),
