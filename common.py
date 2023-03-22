@@ -25,6 +25,7 @@ class BaseGAN:
         self.criterion = None
         self.g_optimizer = None
         self.d_optimizer = None
+        self.z = None
 
     def build_dataset(self):
         transform = torchvision.transforms.Compose([
@@ -106,7 +107,7 @@ class BaseGAN:
         # Save sample images per epoch to gif
         os.makedirs('results', exist_ok=True)
         frames[0].save(os.path.join('results', f'train_{self.config["model_name"].lower()}.gif'), 'GIF',
-                       save_all=True, append_images=frames, duration=110, loop=0)
+                       save_all=True, append_images=frames, duration=100, loop=0)
 
         wandb.finish()
 

@@ -51,9 +51,10 @@ class GAN(common.BaseGAN):
     def infer(self, num_rows: int) -> np.ndarray:
         self.generator.eval()
 
-        z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
+        if self.z is None:
+            self.z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
         with torch.no_grad():
-            sample_img = self.generator(z)
+            sample_img = self.generator(self.z)
         sample_img = self.post_process_sample_img(sample_img)
         return sample_img
 

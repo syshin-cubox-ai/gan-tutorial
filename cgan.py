@@ -59,6 +59,7 @@ class Discriminator(nn.Module):
 class CGAN(common.BaseGAN):
     def __init__(self, config: dict, generator: nn.Module, discriminator: nn.Module, z_dim: int):
         super().__init__(config, generator, discriminator, z_dim)
+        self.g_label = None
 
     def train_step(
             self,
@@ -101,10 +102,11 @@ class CGAN(common.BaseGAN):
     def infer(self, num_rows: int) -> np.ndarray:
         self.generator.eval()
 
-        z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
-        g_label = torch.tile(torch.arange(10, device=self.device), (num_rows,))
+        if self.z is None:
+            self.z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
+            self.g_label = torch.tile(torch.arange(10, device=self.device), (num_rows,))
         with torch.no_grad():
-            sample_img = self.generator(z, g_label)
+            sample_img = self.generator(self.z, self.g_label)
         sample_img = self.post_process_sample_img(sample_img)
         return sample_img
 
