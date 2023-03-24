@@ -53,7 +53,7 @@ class GAN(common.BaseGAN):
 
         if self.z is None:
             self.z = torch.randn((num_rows * 10, self.z_dim), device=self.device)
-        with torch.no_grad():
+        with torch.inference_mode():
             sample_img = self.generator(self.z)
         sample_img = self.post_process_sample_img(sample_img)
         return sample_img
