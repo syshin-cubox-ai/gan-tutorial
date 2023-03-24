@@ -73,7 +73,7 @@ class CGAN(common.BaseGAN):
 
         # 1. Update discriminator: maximize log(D(x)) + log(1 - D(G(z))
         # 판별자가 real 이미지를 real로 인식하는 loss 계산
-        self.d_optimizer.zero_grad(set_to_none=True)
+        self.d_optimizer.zero_grad()
         real_score = self.discriminator(imgs, labels)
         d_loss_real = self.criterion(real_score, real_labels)
 
@@ -91,7 +91,7 @@ class CGAN(common.BaseGAN):
 
         # 2. Update discriminator: maximize log(D(G(z)))
         # 생성자가 판별자를 속였는지에 대한 loss를 계산하고, 생성자 모델 가중치 업데이트
-        self.g_optimizer.zero_grad(set_to_none=True)
+        self.g_optimizer.zero_grad()
         deception_score = self.discriminator(self.generator(z, g_label), g_label)
         g_loss = self.criterion(deception_score, real_labels)
         g_loss.backward()
