@@ -93,7 +93,6 @@ if __name__ == '__main__':
         'batch_size': 256,
         'epoch': 50,
         'lr': 0.0002,
-        'reproducibility': True,
         'num_workers': 8,
         'pin_memory': True,
         'prefetch_factor': 60000,

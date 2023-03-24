@@ -14,6 +14,22 @@ import wandb
 from PIL import Image
 
 
+def init_seeds(seed=0, deterministic=True):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    if deterministic:
+        torch.backends.cudnn.deterministic = True
+        torch.use_deterministic_algorithms(True)
+        os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+
+
+init_seeds()
+
+
 class BaseGAN:
     def __init__(self, config: dict, generator: nn.Module, discriminator: nn.Module, z_dim: int):
         self.config = config
@@ -61,17 +77,6 @@ class BaseGAN:
         self.build_dataset()
         self.build_criterion()
         self.build_optimizer()
-
-        if self.config['reproducibility']:
-            torch.manual_seed(0)
-            torch.cuda.manual_seed(0)
-            torch.cuda.manual_seed_all(0)
-            torch.backends.cudnn.benchmark = False
-            torch.backends.cudnn.deterministic = True
-            np.random.seed(0)
-            random.seed(0)
-            torch.use_deterministic_algorithms(True)
-            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
 
         wandb.init(project=f'{self.config["model_name"]}', entity='syshin-cubox-ai', config=self.config)
 
