@@ -17,6 +17,9 @@ class GAN(common.BaseGAN):
             imgs: torch.Tensor,
             labels: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        self.generator.train()
+        self.discriminator.train()
+
         imgs = imgs.to(self.device)
         real_labels = torch.ones((imgs.shape[0], 1), device=self.device)
         fake_labels = torch.zeros((imgs.shape[0], 1), device=self.device)
