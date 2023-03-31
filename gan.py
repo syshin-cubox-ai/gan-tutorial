@@ -17,9 +17,6 @@ class GAN(common.BaseGAN):
             imgs: torch.Tensor,
             labels: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        self.generator.train()
-        self.discriminator.train()
-
         imgs = imgs.to(self.device)
         real_labels = torch.ones((imgs.shape[0], 1), device=self.device)
         fake_labels = torch.zeros((imgs.shape[0], 1), device=self.device)
@@ -32,8 +29,7 @@ class GAN(common.BaseGAN):
 
         # 랜덤 텐서로 fake 이미지를 생성하여 fake로 인식하는 loss 계산
         z = torch.randn((imgs.shape[0], self.z_dim), device=self.device)
-        fake_img = self.generator(z)
-        fake_score = self.discriminator(fake_img)
+        fake_score = self.discriminator(self.generator(z))
         d_loss_fake = self.criterion(fake_score, fake_labels)
 
         # real과 fake 이미지로 낸 오차를 더해서 최종 판별자 loss를 계산하고, 판별자 모델 업데이트

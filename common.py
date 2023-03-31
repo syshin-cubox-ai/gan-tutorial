@@ -86,6 +86,9 @@ class BaseGAN:
         fake_score = None
         frames = []
         for _ in tqdm.tqdm(range(self.config['epoch']), f'{self.config["model_name"]} Train', position=0):
+            self.generator.train()
+            self.discriminator.train()
+
             for imgs, labels in tqdm.tqdm(self.trainloader, 'Batch', leave=False, position=1):
                 d_loss, g_loss, real_score, fake_score = self.train_step(imgs, labels)
 
